@@ -40,6 +40,8 @@ If you want to customize some features you can either:
 1. Edit the _options member in the lookiehere object 
 2. Use the lookiehere.options method and give it an object with option keys and values (e.g; ```lookiehere.options({color: '#DC2C90', opacity: 0.3})```)
 
+before calling ```lookiehere.init();```.
+
 Speaking of the options...
 
 ##### General options:
