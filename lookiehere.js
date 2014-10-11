@@ -104,6 +104,7 @@ var lookiehere = {
         tab.style.opacity = this._options.tabOpacity;
         tab.style.padding = '0.2em';
 
+        tab.setAttribute('class', 'lookiehere-tab');
         tab.setAttribute('data-lookiehere-img-src', elem.getAttribute(lookiehere._options.attribute));
 
         tab.innerHTML = this._options.tabText;
