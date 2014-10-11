@@ -1,4 +1,4 @@
-// TODO: get user customizable CSS out os .jf file and into a .css file
+// TODO: get user customizable CSS out of the .js file and into a .css file
 
 var lookiehere = {
     _options: {
