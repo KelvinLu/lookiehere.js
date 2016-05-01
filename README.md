@@ -46,7 +46,7 @@ Speaking of the options...
 
 ##### General options:
 * ```selector```: A CSS-style selector that indicates which images lookiehere creates a tab or click event for. The default is ```img.lookiehere```.
-* ```attribute```: The attribute which indicates the URL of your full size image. By default is ```src```, but if you actually have a rescaling script on the backend and the URL of the full size is indicated by another attribute in your ```<img>``` tag, please set it here.
+* ```attribute```: The attribute which indicates the URL of your full size image (e.g.; `data-full-image-url="http://..."`). The default is ```src```, which assumes the full size image is the one linked and embedded. If ```src``` points to a separate smaller thumbnail/preview image and the full size image can be accessed by another URL, use an attribute to hold that URL.
 
 ##### Tab options:
 * ```activateByTab```: A boolean, true by default. If it is true, a small tab (a simple ```span```, really) will be created at the top-left of your image which can be clicked to activate the modal. If it is false, no tab will be created and the whole image will be clickable.
