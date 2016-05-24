@@ -5,6 +5,9 @@ var lookiehere = {
         // Image selection properties
         selector: 'img.lookiehere',
         attribute: 'src',
+        imgSrc: function(elem) {
+            return elem.getAttribute(lookiehere._options.attribute);
+        },
 
         // Tabbing and tabbing accessories
         activateByTab: true,
@@ -14,7 +17,7 @@ var lookiehere = {
         tabOpacity: '0.5',
 
         // Modal stuff... the main stuff
-        padding: '10em',
+        padding: '1em',
         color: 'black',
         opacity: '0.5',
         transition: '0.2s',
@@ -24,26 +27,39 @@ var lookiehere = {
         for (var key in opts)
             if (opts.hasOwnProperty(key))
                 this._options[key] = opts[key];
-    },    
+    },
 
     init: function(){
-        // Modal, tab contaier creation
+        var self = this;
+
+        // Modal, tab creation
         this.createModal();
-        this.createTabContainer();
+
+        if (this._options.activateByTab) {
+            this.createTab();
+        }
 
         // Event binding
         this.bindImages();
     },
 
-    createTabContainer: function() {
-        if (this.tabContainer) document.body.removeChild(this.tabContainer);
+    createTab: function() {
+        if (this.tabElem) document.body.removeChild(this.tabElem);
 
-        tabContainer = document.createElement('div');
-        tabContainer.setAttribute('class', 'lookiehere-tabcontainer');
-        tabContainer.style.cssText = 'position: absolute; left: 0px; top: 0px;'
-        document.body.appendChild(tabContainer);
+        tabElem = document.createElement('span');
+        tabElem.setAttribute('class', 'lookiehere-tab');
+        tabElem.style.cssText = 'position: absolute; left: 0px; top: 0px; z-index: 2147483646; cursor: zoom-in; display: none;'
+        tabElem.style.backgroundColor = this._options.tabColor;
+        tabElem.style.color = this._options.tabFontColor;
+        tabElem.style.opacity = this._options.tabOpacity;
+        tabElem.style.padding = '0.2em';
 
-        this.tabContainer = tabContainer;
+        tabElem.innerHTML = this._options.tabText;
+
+        tabElem.addEventListener('click', this.updateAndShowModalFromTab);
+
+        document.body.appendChild(tabElem);
+        this.tabElem = tabElem;
     },
 
     createModal: function() {
@@ -52,7 +68,7 @@ var lookiehere = {
         container = document.createElement('div');
         container.setAttribute('class', 'lookiehere-container');
         container.style.cssText = 'position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; opacity: 0; z-index: 2147483647; pointer-events: none;'
-        container.style.setProperty('-webkit-Transition' , 'opacity ' + this._options.transition); 
+        container.style.setProperty('-webkit-Transition' , 'opacity ' + this._options.transition);
         container.style.transition = 'opacity ' + this._options.transition;
         document.body.appendChild(container);
 
@@ -67,86 +83,106 @@ var lookiehere = {
         imageElem.style.padding = this._options.padding;
         container.appendChild(imageElem);
 
-        this.bindEvent(container, 'click', this.hideModal);
+        container.addEventListener('click', this.hideModal);
 
         this.container = container;
         this.imageElem = imageElem;
     },
 
+    _images: [],
+
     // Called from modal container
     hideModal: function() {
         this.style.opacity = 0;
-        this.style.pointerEvents = 'none';    
+        this.style.pointerEvents = 'none';
     },
 
     bindImages: function() {
-        elems = document.querySelectorAll(this._options.selector);
+        this.unbindImages();
+
+        this._images = imgElems = document.querySelectorAll(this._options.selector);
 
         if (this._options.activateByTab) {
-            for (var i = elems.length - 1; i >= 0; i--) {
-                this.addTab(elems[i]);
-            };
+            for (var i = 0; i < imgElems.length; ++i) {
+                imgElems[i].addEventListener('mouseover', this.showTab);
+            }
         } else {
-            for (var i = elems.length - 1; i >= 0; i--) {
-                this.bindEvent(elems[i], 'click', this.updateAndShowModal);
-            };            
+            for (var i = 0; i < imgElems.length; ++i) {
+                imgElems[i].addEventListener('click', this.updateAndShowModal);
+            }
         }
     },
 
-    addTab: function(elem) {
-        offsets = this.utils.getOffsets(elem);
-        tab = document.createElement('span');
-        tab.style.cssText = 'position: absolute;';
-        tab.style.left = offsets.left + 'px';
-        tab.style.top = offsets.top + 'px';
-        tab.style.backgroundColor = this._options.tabColor;
-        tab.style.color = this._options.tabFontColor;
-        tab.style.opacity = this._options.tabOpacity;
-        tab.style.padding = '0.2em';
-
-        tab.setAttribute('class', 'lookiehere-tab');
-        tab.setAttribute('data-lookiehere-img-src', elem.getAttribute(lookiehere._options.attribute));
-
-        tab.innerHTML = this._options.tabText;
-
-        this.tabContainer.appendChild(tab);
-
-        this.bindEvent(tab, 'click', this.updateAndShowModalFromTab);
+    bindImage: function(elem) {
+        if (this._options.activateByTab) {
+            elem.addEventListener('mouseover', this.showTab);
+        } else {
+            elem.addEventListener('click', this.updateAndShowModal);
+        }
     },
 
-    // For compatibility issues with adding event handlers
-    bindEvent: function(elem, e, func) {
-        if (elem.addEventListener)
-            elem.addEventListener(e, func, false);
-        else
-            elem.attachEvent('on' + e, func);
+    unbindImages: function() {
+        if (this._options.activateByTab) {
+            for (var i = 0; i < this._images.length; ++i) {
+                this._images[i].removeEventListener('mouseover', this.showTab);
+            }
+        } else {
+            for (var i = 0; i < this._images.length; ++i) {
+                this._images[i].removeEventListener('click', this.updateAndShowModal);
+            }
+        }
+    },
+
+    unbindImage: function(elem) {
+        if (this._options.activateByTab) {
+            elem.removeEventListener('mouseover', this.showTab);
+        } else {
+            elem.removeEventListener('click', this.updateAndShowModal);
+        }
+    },
+
+    showTab: function(e) {
+        offsets = lookiehere.utils.getOffsets(this);
+        lookiehere.tabElem.style.left = offsets.left + 'px';
+        lookiehere.tabElem.style.top = offsets.top + 'px';
+        lookiehere.tabElem.style.display = 'inline';
+
+        lookiehere.tabElem.setAttribute('data-lookiehere-img-src', lookiehere._options.imgSrc(this));
     },
 
     // This actual event handler, called from the binded object
     updateAndShowModal: function(e) {
-        lookiehere.imageElem.setAttribute('src', this.getAttribute(lookiehere._options.attribute));
-        lookiehere.container.style.opacity = 1;
-        lookiehere.container.style.pointerEvents = 'auto';
+        lookiehere.imageElem.setAttribute('src', lookiehere._options.imgSrc(this));
+        lookiehere.imageElem.addEventListener('load', callback = (function() {
+            lookiehere.container.style.opacity = 1;
+            lookiehere.container.style.pointerEvents = 'auto';
+            lookiehere.imageElem.removeEventListener('load', callback);
+        }));
     },
 
     // Called from tab
     updateAndShowModalFromTab: function(e) {
         lookiehere.imageElem.setAttribute('src', this.getAttribute('data-lookiehere-img-src'));
-        lookiehere.container.style.opacity = 1;
-        lookiehere.container.style.pointerEvents = 'auto';
+        lookiehere.imageElem.addEventListener('load', callback = (function() {
+            lookiehere.container.style.opacity = 1;
+            lookiehere.container.style.pointerEvents = 'auto';
+            lookiehere.imageElem.removeEventListener('load', callback);
+        }));
     },
 
     cleanUp: function() {
+        this.unbindImages();
         document.body.removeChild(this.container);
+        document.body.removeChild(this.tabElem);
     },
 
     utils: {
         getOffsets: function(elem){
             var left = 0, top = 0;
             do {
-              if (!isNaN(elem.offsetLeft)) 
+              if (!isNaN(elem.offsetLeft))
                 left += elem.offsetLeft;
-              if (!isNaN(elem.offsetTop)) 
+              if (!isNaN(elem.offsetTop))
                 top += elem.offsetTop;
             } while (elem = elem.offsetParent);
             return {left: left, top: top};
