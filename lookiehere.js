@@ -108,6 +108,7 @@ var lookiehere = {
             }
         } else {
             for (var i = 0; i < imgElems.length; ++i) {
+                imgElems[i].style.cursor = 'zoom-in';
                 imgElems[i].addEventListener('click', this.updateAndShowModal);
             }
         }
@@ -117,6 +118,7 @@ var lookiehere = {
         if (this._options.activateByTab) {
             elem.addEventListener('mouseover', this.showTab);
         } else {
+            elem.style.cursor = 'zoom-in';
             elem.addEventListener('click', this.updateAndShowModal);
         }
     },
@@ -128,6 +130,7 @@ var lookiehere = {
             }
         } else {
             for (var i = 0; i < this._images.length; ++i) {
+                this._images[i].style.cursor = 'zoom-in';
                 this._images[i].removeEventListener('click', this.updateAndShowModal);
             }
         }
@@ -137,6 +140,7 @@ var lookiehere = {
         if (this._options.activateByTab) {
             elem.removeEventListener('mouseover', this.showTab);
         } else {
+            elem.style.cursor = 'auto';
             elem.removeEventListener('click', this.updateAndShowModal);
         }
     },
